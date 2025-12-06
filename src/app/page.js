@@ -1,8 +1,13 @@
+import Hero from '@/components/Hero'
+import { SocialIcons } from '@/components/SocialIcons'
 import React from 'react'
 
 function Home() {
   return (
-    <div>Home</div>
+    <section>
+      <Hero/>
+      <SocialIcons/>
+    </section>
   )
 }
 
