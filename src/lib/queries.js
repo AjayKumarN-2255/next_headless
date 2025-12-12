@@ -15,3 +15,11 @@ export async function getCategories(params) {
     const data = await client.request(query);
     return data.categories.nodes;
 }
+
+export async function getAllPosts(searchTerm, category, params) {
+
+    const hasSearchTerm = searchTerm && searchTerm.trim() !== '';
+    const hasCategory = category && category.trim() !== '';
+    const isPrevious = !!params.before;
+
+}
