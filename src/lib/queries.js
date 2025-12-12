@@ -15,7 +15,3 @@ export async function getCategories(params) {
     const data = await client.request(query);
     return data.categories.nodes;
 }
-
-getCategories().then((res)=>{
-    console.log(res)
-});
