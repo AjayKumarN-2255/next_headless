@@ -72,7 +72,7 @@ export async function getAllPosts(searchTerm, category, params) {
    `;
 
     const variables = {
-        perpage: 10,
+        perpage: 5,
         ...(
             isPrevious ?
                 { before: params.before }
