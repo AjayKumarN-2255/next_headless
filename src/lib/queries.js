@@ -3,7 +3,7 @@ import { gql, GraphQLClient } from "graphql-request";
 
 const client = new GraphQLClient('http://localhost:10028/headless');
 export async function getCategories(params) {
-    const query = gql`query getCategories {
+  const query = gql`query getCategories {
                           categories {
                                 nodes {
                                     id
@@ -12,36 +12,36 @@ export async function getCategories(params) {
                                 }
                             }
                         }`
-    const data = await client.request(query);
-    return data.categories.nodes;
+  const data = await client.request(query);
+  return data.categories.nodes;
 }
 
 export async function getAllPosts(searchTerm, category, params) {
 
-    const hasSearchTerm = searchTerm && searchTerm.trim() !== '';
-    const hasCategory = category && category.trim() !== '';
+  const hasSearchTerm = searchTerm && searchTerm.trim() !== '';
+  const hasCategory = category && category.trim() !== '';
 
-    const isPrevious = !!params?.before;
+  const isPrevious = !!params?.before;
 
-    //defenition
-    const varDefinition = [
-        '$perpage:Int!',
-        isPrevious ? '$before:String' : '$after:String',
-        hasSearchTerm ? '$search:String' : '',
-        hasCategory ? '$categoryName:String' : ''
-    ].filter(Boolean).join(',');
+  //defenition
+  const varDefinition = [
+    '$perpage:Int!',
+    isPrevious ? '$before:String' : '$after:String',
+    hasSearchTerm ? '$search:String' : '',
+    hasCategory ? '$categoryName:String' : ''
+  ].filter(Boolean).join(',');
 
-    //where section
-    const whereCondition = [
-        hasSearchTerm ? 'search:$search' : '',
-        hasCategory ? 'categoryName:$categoryName' : ''
-    ].filter(Boolean);
+  //where section
+  const whereCondition = [
+    hasSearchTerm ? 'search:$search' : '',
+    hasCategory ? 'categoryName:$categoryName' : ''
+  ].filter(Boolean);
 
-    const whereClause = whereCondition.length > 0 ?
-        `where : {${whereCondition.join(',')}}`
-        : '';
+  const whereClause = whereCondition.length > 0 ?
+    `where : {${whereCondition.join(',')}}`
+    : '';
 
-    const query = gql`
+  const query = gql`
     query GetPosts(${varDefinition}) {
     posts(
       ${isPrevious ? 'last:$perpage' : 'first:$perpage'},
@@ -71,32 +71,59 @@ export async function getAllPosts(searchTerm, category, params) {
    }
    `;
 
-    const variables = {
-        perpage: 5,
-        ...(
-            isPrevious ?
-                { before: params.before }
-                :
-                { after: params.after }
-        )
-    }
+  const variables = {
+    perpage: 5,
+    ...(
+      isPrevious ?
+        { before: params.before }
+        :
+        { after: params.after }
+    )
+  }
 
-    if (hasSearchTerm) {
-        variables.search = searchTerm;
-    }
+  if (hasSearchTerm) {
+    variables.search = searchTerm;
+  }
 
-    if (hasCategory) {
-        variables.categoryName = category;
-    }
+  if (hasCategory) {
+    variables.categoryName = category;
+  }
 
-    const data = await client.request(query, variables);
+  const data = await client.request(query, variables);
 
-    return {
-        posts: data.posts.nodes,
-        pageInfo: data.posts.pageInfo,
-        ...(hasSearchTerm && { searchTerm }),
-        ...(hasCategory && { category })
-    }
+  return {
+    posts: data.posts.nodes,
+    pageInfo: data.posts.pageInfo,
+    ...(hasSearchTerm && { searchTerm }),
+    ...(hasCategory && { category })
+  }
 }
 
-getAllPosts();
+export const getSinglePost = async (slug = "styling-with-css") => {
+  const query = gql`
+    query GetSinglePost($slug: ID!) {
+      post(id: $slug, idType: SLUG){
+        id
+        title
+        content
+        date
+        author {
+         node {
+            name
+          }
+        }
+        categories {
+          nodes {
+            name
+            slug
+          }
+        }
+      }
+    }
+  `
+  const variable = { slug };
+  const data = await client.request(query, variable);
+  return data?.post;
+}
+
+getSinglePost()
